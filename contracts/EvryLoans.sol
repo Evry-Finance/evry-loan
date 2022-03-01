@@ -2,10 +2,14 @@
 pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import {CDP} from "./libraries/evryLoans/CDP.sol";
@@ -19,15 +23,16 @@ import {Vault} from "./libraries/evryLoans/Vault.sol";
 import "hardhat/console.sol";
 
 /// @title EvryLoans
-                                                                                              
-contract EvryLoans is ReentrancyGuard {
+
+/// Using openzeppelin UUPS Upgradable Proxies                                                                           
+contract EvryLoans is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
   using CDP for CDP.Data;
   using FixedPointMath for FixedPointMath.FixedDecimal;
   using Vault for Vault.Data;
   using Vault for Vault.List;
-  using SafeERC20 for IMintableERC20;
+  using SafeERC20Upgradeable for IMintableERC20;
   using SafeMath for uint256;
-  using Address for address;
+  using AddressUpgradeable for address;
 
   address public constant ZERO_ADDRESS = address(0);
 
@@ -42,7 +47,7 @@ contract EvryLoans is ReentrancyGuard {
   ///
   /// IMPORTANT: This constant is a raw FixedPointMath.FixedDecimal value and assumes a resolution of 64 bits. If the
   ///            resolution for the FixedPointMath library changes this constant must change as well.
-  uint256 public constant MINIMUM_COLLATERALIZATION_LIMIT = 1000000000000000000;
+  uint256 public constant MINIMUM_COLLATERALIZATION_LIMIT = 500000000000000000;
 
   /// @dev The maximum value that the collateralization limit can be set to by the governance. This is a safety rail
   /// to prevent the collateralization from being set to a value which breaks the system.
@@ -51,7 +56,7 @@ contract EvryLoans is ReentrancyGuard {
   ///
   /// IMPORTANT: This constant is a raw FixedPointMath.FixedDecimal value and assumes a resolution of 64 bits. If the
   ///            resolution for the FixedPointMath library changes this constant must change as well.
-  uint256 public constant MAXIMUM_COLLATERALIZATION_LIMIT = 4000000000000000000;
+  uint256 public constant MAXIMUM_COLLATERALIZATION_LIMIT = 10000000000000000000;
 
   event GovernanceUpdated(
     address governance
@@ -195,15 +200,22 @@ contract EvryLoans is ReentrancyGuard {
   /// If false, vault, vault adapter, and evryMix are not required (Default)
   /// If true, vault, vault adapter, and evryMix are required
   bool public selfRepayMode;
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() initializer {}
   
-  constructor(
+  function initialize(
     IMintableERC20 _token,
     IMintableERC20 _xtoken,
     address _governance,
     address _sentinel
-  ) {
+  ) initializer public {
     require(_governance != ZERO_ADDRESS, "EvryLoans: governance address cannot be 0x0.");
     require(_sentinel != ZERO_ADDRESS, "EvryLoans: sentinel address cannot be 0x0.");
+
+    __Ownable_init();
+    __UUPSUpgradeable_init();
+    __ReentrancyGuard_init();
 
     token = _token;
     xtoken = _xtoken;
@@ -212,10 +224,15 @@ contract EvryLoans is ReentrancyGuard {
     flushActivator = 10000 ether;// change for non 18 digit tokens
     selfRepayMode = false;
 
-    uint256 COLL_LIMIT = MINIMUM_COLLATERALIZATION_LIMIT.mul(2);
+    uint256 COLL_LIMIT = MINIMUM_COLLATERALIZATION_LIMIT.mul(1);
     _ctx.collateralizationLimit = FixedPointMath.FixedDecimal(COLL_LIMIT);
     _ctx.accumulatedYieldWeight = FixedPointMath.FixedDecimal(0);
   }
+
+  /// @dev Override with onlyOwner modifier to restrict upgrade authority to Owner 
+  ///
+  /// Refer to UUPS upgradeable proxies documentation
+  function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 
   /// @dev Sets the pending governance.
   ///

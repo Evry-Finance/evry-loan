@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 //import "hardhat/console.sol";
 
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IDetailedERC20} from "../../interfaces/IDetailedERC20.sol";
 import {IVaultAdapter} from "../../interfaces/IVaultAdapter.sol";
@@ -16,7 +16,7 @@ import "hardhat/console.sol";
 library Vault {
   using Vault for Data;
   using Vault for List;
-  using SafeERC20 for IDetailedERC20;
+  using SafeERC20Upgradeable for IDetailedERC20;
   using SafeMath for uint256;
 
   struct Data {

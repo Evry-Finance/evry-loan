@@ -15,6 +15,8 @@
     "@nomiclabs/hardhat-waffle": "^2.0.2",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.4.1",
+    "@openzeppelin/contracts-upgradeable": "^4.5.1",
+    "@openzeppelin/hardhat-upgrades": "^1.14.0",
     "@typechain/ethers-v5": "^9.0.0",
     "@typechain/hardhat": "4.0.0",
     "@typechain/truffle-v5": "^7.0.0",
@@ -62,11 +64,13 @@
     "deploy:005": "sh -c 'hardhat deploy --reset --tags VaultAdapter --network $0'",
     "deploy:006": "sh -c 'hardhat deploy --reset --tags EvryHyperMock --network $0'",
     "deploy:007": "sh -c 'hardhat deploy --reset --tags AttackerMock --network $0'",
+    "deploy:008": "sh -c 'hardhat deploy --reset --tags EvryLoansNewImpl --network $0'",
     "init:101": "sh -c 'hardhat deploy --reset --tags InitializeEvryLoans --network $0'",
     "init:102": "sh -c 'hardhat deploy --reset --tags InitializeEvToken --network $0'",
     "init:103": "sh -c 'hardhat deploy --reset --tags InitializeEvryMix --network $0'",
     "set:201": "sh -c 'hardhat deploy --reset --tags TurnSelfRepayModeOn --network $0'",
-    "set:202": "sh -c 'hardhat deploy --reset --tags ApproveTokenForEvryLoans --network $0'"
+    "set:202": "sh -c 'hardhat deploy --reset --tags ApproveTokenForEvryLoans --network $0'",
+    "upgrade:301": "sh -c 'hardhat deploy --reset --tags EvryLoansUpgradeDirect --network $0'"
   },
   "dependencies": {
     "@studydefi/money-legos": "^2.4.2",

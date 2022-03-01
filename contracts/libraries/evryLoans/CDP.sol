@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import {FixedPointMath} from "../FixedPointMath.sol";
@@ -15,7 +15,7 @@ import "hardhat/console.sol";
 library CDP {
   using CDP for Data;
   using FixedPointMath for FixedPointMath.FixedDecimal;
-  using SafeERC20 for IDetailedERC20;
+  using SafeERC20Upgradeable for IDetailedERC20;
   using SafeMath for uint256;
 
   struct Context {
